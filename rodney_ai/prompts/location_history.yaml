@@ -1,0 +1,10 @@
+_type: prompt
+input_variables:
+  - building_name
+  - date_and_time
+output_parser: null
+partial_variables: {}
+template: >
+  Started visiting the {building_name} building at {date_and_time}.
+
+template_format: f-string

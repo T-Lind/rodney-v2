@@ -1,0 +1,34 @@
+{
+  "locations": [
+    {
+      "location_name": "ZACH",
+      "description": "The Zachry building, home of the Texas A&M College of Engineering, where most engineering classes are.",
+      "gps_ew": 30.62124,
+      "gps_ns": -96.34038
+    },
+    {
+      "location_name": "HRBB",
+      "description": "H.R. Bright Building. Home to the Computer Science and Engineering Department.",
+      "gps_ew": 30.61908,
+      "gps_ns": -96.33880
+    },
+    {
+      "location_name": "DLEB",
+      "description": "Dwight Look Engineering Building. Houses administrative offices for the College of Engineering.",
+      "gps_ew": 30.62019,
+      "gps_ns": -96.33992
+    },
+    {
+      "location_name": "MSC",
+      "description": "Memorial Student Center. A hub for student activities and services. It's an extremely notable building on campus.",
+      "gps_ew": 30.61234,
+      "gps_ns": -96.34155
+    },
+    {
+      "location_name": "ILSB",
+      "description": "Interdisciplinary Life Sciences Building. Facilitates research and teaching for the life sciences.",
+      "gps_ew": 30.61434,
+      "gps_ns": -96.34368
+    }
+  ]
+}

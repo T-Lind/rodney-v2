@@ -1,0 +1,33 @@
+_type: prompt
+input_variables:
+  - directive
+  - locations_and_names
+  - location_history
+  - example_1
+  - example_2
+output_parser: null
+partial_variables: {}
+template: >
+  You are in control of a mobile robot that has the following directive (in triple backticks below):
+  ```{directive}```
+  
+  In order to accomplish this directive, you can go to the any location on the Texas A&M University College Station campus.
+  Here's your location history, of where you've been to, and for how long you've been at each location (in triple backticks below):
+  ```{location_history}```
+  
+  To achieve this directive, please either pick from the list of locations and their descriptions below, or pick nothing to remain in the same place.
+  They're also sorted from closest to furthest below (in triple backticks below).
+  ```{locations_and_names}```
+  
+  Please format your answer in JSON format, with the building_name field either directly sourced from the list of locations and names above, or empty.
+  You can also add a "reasoning" text field to describe why you picked that building.
+  
+  Here's a few-shot example of what appropriate responses should be:
+
+  {example_1}
+  
+  or, for staying in the same place,
+  {example_2}
+  
+
+template_format: f-string
