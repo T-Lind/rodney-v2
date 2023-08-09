@@ -70,22 +70,25 @@ class RodneyAi:
         self.communication.transcriber.start_transcription()
         self.communication.tts.start()
 
-        user_name = ""  # default name
         detected_uuids = self.communication.azure_face_identifier.get_detected_uuids()
         person_info = None
         uuid = None
         if detected_uuids:
             uuid = detected_uuids[0]  # considering only the first detected UUID
             person_info = self.communication.face_database.retrieve_person_info(
-                uuid)  # Assuming azure_database is the name of the AzureDatabase instance in communication
+                uuid)
             if person_info:
-                user_name = person_info["Name"]
                 if len(detected_uuids) > 1:
-                    self.communication.tts.speak("I'm sorry, I can only speak to one person at a time, " + user_name)
+                    self.communication.tts.speak(
+                        "I'm sorry, I can only speak to one person at a time, " + person_info["Name"])
 
         my_location = self.location_history[-1]
         self.conversation = Conversation(self.directive, person_info,
                                          f"{self.location_history[-1]}: {self.location_data.get_description(my_location)}")
+
+        introduction = self.conversation.chatbot.ask(
+            "You're initiating the conversation, so start off with an appropriate introduction based on the system message above.")
+        self.communication.tts.speak(introduction)
 
         while True:
             # 1. Wait for a new transcription (this can be blocking as we are in a loop)
