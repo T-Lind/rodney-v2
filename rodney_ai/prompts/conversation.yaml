@@ -1,0 +1,12 @@
+_type: prompt
+input_variables:
+  - directive
+  - person_name
+  - location
+  -
+output_parser: null
+partial_variables: {}
+template: >
+  TODO
+
+template_format: f-string

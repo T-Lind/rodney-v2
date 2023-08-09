@@ -62,5 +62,3 @@ class AzureSpeechTranscriber:
         while not self.transcription_queue.empty():
             transcriptions.append(self.transcription_queue.get())
         return transcriptions
-
-
