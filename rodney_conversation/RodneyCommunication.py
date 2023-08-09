@@ -13,7 +13,7 @@ dotenv_path = join(dirname(__file__), "./../.env")
 load_dotenv(dotenv_path)
 
 
-class RodneyConversations:
+class RodneyCommunication:
     def __init__(self):
         self.azure_face_identifier = AzureFaceIdentifier(os.environ.get("ENDPOINT"),
                                                          os.environ.get("AZURE_FACE_API_KEY"),
@@ -28,6 +28,3 @@ class RodneyConversations:
 
         self.tts = AzureTextToSpeech(os.environ.get("AZURE_SPEECH_API_KEY"),
                                      os.environ.get("AZURE_SPEECH_REGION"))
-
-        self.chatbot = ChatOpenAI(model_name=os.environ.get("OPENAI_MODEL_USED"),
-                                  max_tokens=1000, openai_api_key=os.environ.get("OPENAI_API_KEY"))

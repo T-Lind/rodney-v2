@@ -25,7 +25,7 @@ ENGINES = [
 class Chatbot:
     def __init__(
             self,
-            api_key: str,
+            api_key: str = os.environ.get("OPENAI_API_KEY"),
             engine: str = os.environ.get("OPENAI_MODEL_USED") or "gpt-3.5-turbo",
             proxy: str = None,
             timeout: float = None,
