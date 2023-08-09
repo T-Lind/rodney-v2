@@ -1,10 +1,17 @@
+from datetime import datetime
 from langchain.chat_models import ChatOpenAI
 
 from rodney_ai.GPTChatCompleter import get_gpt_completions
-from rodney_ai.prompts.PromptUtil import choose_location_template, filter_irrelevant_locations_template, printf, \
-    log_location_template
 from rodney_ai.LocationData import LocationData
-from datetime import datetime
+from rodney_ai.prompts.PromptUtil import choose_location_template, printf, \
+    log_location_template
+
+from os.path import join, dirname
+from dotenv import load_dotenv
+import os
+
+dotenv_path = join(dirname(__file__), "./../.env")
+load_dotenv(dotenv_path)
 
 
 class RodneyAi:
@@ -13,7 +20,7 @@ class RodneyAi:
         self.verbose = verbose
         self.model_name = model_name
         self.chatbot_ai = ChatOpenAI(temperature=0.0, max_tokens=100, model_name=model_name,
-                                     openai_api_key="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")
+                                     openai_api_key=os.environ.get("OPENAI_API_KEY"))
 
         self.location_data = LocationData()
 
