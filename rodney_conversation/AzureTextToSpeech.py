@@ -1,6 +1,7 @@
-import azure.cognitiveservices.speech as speechsdk
-import threading
 import queue
+import threading
+
+import azure.cognitiveservices.speech as speechsdk
 import pyaudio
 
 

@@ -10,8 +10,11 @@ load_dotenv(dotenv_path)
 
 class AzureDatabase:
     def create_table_ONE_TIME(self):
+        """
+        THIS SHOULD ONLY BE RUN ONCE, EVER
+        """
         self.cursor.execute(
-            """CREATE TABLE PersonInfo (
+            """CREATE TABLE IF NOT EXISTS PersonInfo (
                UUID NVARCHAR(50) PRIMARY KEY,
                Name NVARCHAR(255),
                Notes NVARCHAR(MAX)
