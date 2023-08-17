@@ -7,8 +7,9 @@ from dotenv import load_dotenv
 from rodney_ai.Chatbot import Chatbot
 from rodney_ai.GPTChatCompleter import get_gpt_completions
 from rodney_ai.LocationData import LocationData
-from rodney_ai.prompts.PromptUtil import choose_location_template, printf, \
+from rodney_ai.prompts.PromptUtil import choose_location_template, \
     log_location_template, conversation_template
+from rodney_conversation.printf import printf
 from rodney_conversation.RodneyCommunication import RodneyCommunication
 
 dotenv_path = join(dirname(__file__), "./../.env")

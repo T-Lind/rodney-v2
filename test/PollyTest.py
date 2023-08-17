@@ -1,12 +1,13 @@
 import os
 
 import boto3
-from dotenv import load_dotenv
 import pyaudio
+from dotenv import load_dotenv
 
 load_dotenv("./../.env")
 
 aws_default_region = os.getenv("AWS_DEFAULT_REGION")
+
 
 def play_speech_from_polly(text):
     polly_client = boto3.client('polly', region_name=aws_default_region)
