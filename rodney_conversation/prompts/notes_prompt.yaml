@@ -1,0 +1,17 @@
+_type: prompt
+input_variables:
+  - directive
+output_parser: null
+partial_variables: {}
+# TODO: In the future, change the situational context below to adapt based on location / previous convos
+template: >
+  This is the notes prompt, where you are to write down notes from the last conversation.
+  
+  To refresh your memory, here is your directive again:
+  ```{directive}```
+  
+  Respond with anything that might be useful from the previous conversation in a JSON format.
+  "name" should be a field that you fill out or leave as an empty string if you don't know their name,
+  and "notes" should be a field that you fill out or leave as an empty string, if you have any relevant notes.
+
+template_format: f-string

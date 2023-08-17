@@ -1,13 +1,15 @@
 import os
 import uuid
+
 import boto3
 import pyaudio
 from dotenv import load_dotenv
 from pandas import read_json
 
 from rodney_ai.Chatbot import Chatbot
+from rodney_conversation.VAD import VAD
 from rodney_conversation.printf import printf
-from rodney_conversation.prompts.PromptUtil import initial_convo_prompt
+from rodney_conversation.prompts.PromptUtil import initial_convo_prompt, notes_prompt
 
 load_dotenv("./../.env")
 
@@ -19,7 +21,7 @@ class RodneyCommunication:
         self.polly_client = boto3.client('polly', region_name=aws_default_region)
         self.transcribe = boto3.client('transcribe', region_name=aws_default_region)
         self.s3_client = boto3.client('s3', region_name=aws_default_region)
-        self.chatbot = Chatbot(temperature=0.5)
+        self.chatbot = Chatbot(temperature=0.1, system_prompt=initial_convo_prompt(directive))
         self.directive = directive
 
     def check_job_name(self, job_name):
@@ -52,7 +54,8 @@ class RodneyCommunication:
 
         # Upload the audio file to S3
         bucket_name = os.getenv("AWS_S3_BUCKET")
-        self.s3_client.upload_file(audio_file_path, bucket_name, unique_filename)
+        with open(audio_file_path, "r") as f:
+            self.s3_client.upload_file(f.name, bucket_name, unique_filename)
 
         # Construct the S3 URI for the uploaded audio file
         audio_file_uri = f"s3://{bucket_name}/{unique_filename}"
@@ -99,14 +102,70 @@ class RodneyCommunication:
         stream.close()
         p.terminate()
 
-    def voice_conversation(self, verbose=False):
+    def mixed_voice_conversation(self, verbose=False):
         initial_prompt = initial_convo_prompt(self.directive)
         if verbose:
-            printf(f"Initial prompt:\n{initial_prompt}", color="green", type="italic")
+            printf(f"System message provided earlier:\n{initial_prompt}", color="green", type="italic")
 
         # Play the initial prompt
-        rodneys_introduction = self.chatbot.ask(initial_prompt)
+        rodneys_introduction = self.chatbot.ask("Hi!")
 
         if verbose:
             printf(f"\nResponse:\n{rodneys_introduction}", color="red", type="italic")
         self.play_speech_from_polly(rodneys_introduction)
+
+        while True:
+            user_input = input("> ")
+
+            if user_input == "exit" or user_input == "end":
+                break
+
+            rodney_response = self.chatbot.ask(user_input)
+
+            if "[END]" in rodney_response:
+                self.play_speech_from_polly(rodney_response.replace("[END]", ""))
+                break
+
+            self.play_speech_from_polly(rodney_response)
+
+        conversation_notes = self.chatbot.ask(notes_prompt(self.directive))
+        print(conversation_notes)
+
+    def voice_conversation(self, verbose=False):
+        initial_prompt = initial_convo_prompt(self.directive)
+        if verbose:
+            printf(f"System message provided earlier:\n{initial_prompt}", color="green", type="italic")
+
+        # Play the initial prompt
+        rodneys_introduction = self.chatbot.ask("Hi!")
+        if verbose:
+            printf(f"\nResponse:\n{rodneys_introduction}", color="red", type="italic")
+        self.play_speech_from_polly(rodneys_introduction)
+
+        segment_index = 0  # Initialize segment index
+
+        while True:
+            audio_file_path = fr"C:\Users\tenant\PycharmProjects\rodney-v2\test\audio_bits\captured_audio_{segment_index:03d}_vad.wav"
+            VAD.capture_and_segment_audio(audio_file_path)
+
+            transcription = self.amazon_transcribe(audio_file_path)
+            printf("Transcription: "+transcription, color="green", type="bold")
+
+            transcription_lower = transcription.lower()
+
+            if "exit" in transcription_lower or "end" in transcription_lower:
+                break
+
+            # Get the response from the chatbot
+            rodney_response = self.chatbot.ask(transcription)
+
+            if "[END]" in rodney_response:
+                self.play_speech_from_polly(rodney_response.replace("[END]", ""))
+                break
+
+            self.play_speech_from_polly(rodney_response)
+
+            segment_index += 1  # Increment segment index
+
+        conversation_notes = self.chatbot.ask(notes_prompt(self.directive))
+        print(conversation_notes)

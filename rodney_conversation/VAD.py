@@ -2,8 +2,11 @@ import collections
 import contextlib
 import os
 import sys
+import time
 import wave
 
+import numpy as np
+import pyaudio
 import webrtcvad
 
 
@@ -141,17 +144,77 @@ class VAD:
             yield b''.join([f.bytes for f in voiced_frames])
 
     @staticmethod
-    def capture_and_segment_audio(filename, vad=webrtcvad.Vad(1), frame_duration_ms=30, sample_rate=16_000):
-        audio, _ = VAD.read_wave(filename)
-        frames = VAD.frame_generator(frame_duration_ms, audio, sample_rate)
-        frames = list(frames)
-        segments = VAD.vad_collector(sample_rate, frame_duration_ms, 300, vad, frames)
+    def capture_audio_from_microphone(sample_rate=16000, chunk_size=1024, num_chunks=10):
+        audio_data = []
 
-        # Create a directory for storing chunks
-        output_dir = filename + "_vad"
-        os.makedirs(output_dir, exist_ok=True)
+        # Initialize PyAudio
+        p = pyaudio.PyAudio()
 
-        for i, segment in enumerate(segments):
-            path = os.path.join(output_dir, f'chunk-{i:02d}.wav')
-            print(' Writing %s' % (path,))
-            VAD.write_wave(path, segment, sample_rate)
+        # Open a microphone stream
+        stream = p.open(format=pyaudio.paInt16,
+                        channels=1,
+                        rate=sample_rate,
+                        input=True,
+                        frames_per_buffer=chunk_size)
+
+        print("Capturing audio from the microphone...")
+
+        for _ in range(num_chunks):
+            audio_chunk = stream.read(chunk_size)
+            audio_data.append(np.frombuffer(audio_chunk, dtype=np.int16))
+
+        # Close the stream and terminate PyAudio
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
+
+        # Convert the audio data into a single numpy array
+        audio_data = np.concatenate(audio_data)
+
+        return audio_data
+
+    @staticmethod
+    def capture_and_segment_audio(audio_file_path, vad=webrtcvad.Vad(3), frame_duration_ms=30, sample_rate=16000, min_capture_duration=3000):
+        # Initialize PyAudio
+        p = pyaudio.PyAudio()
+
+        # Open a microphone stream
+        stream = p.open(format=pyaudio.paInt16,
+                        channels=1,
+                        rate=sample_rate,
+                        input=True,
+                        frames_per_buffer=int(sample_rate * frame_duration_ms / 1000))
+
+        audio_buffer = []  # Buffer to store audio chunks
+        start_time = None
+
+        print("Capturing audio from the microphone...")
+
+        capturing = False  # Flag to indicate if audio is being captured
+
+        while True:
+            audio_chunk = stream.read(int(sample_rate * frame_duration_ms / 1000))
+            audio_data = np.frombuffer(audio_chunk, dtype=np.int16)
+
+            if vad.is_speech(audio_chunk, sample_rate):
+                start_time = time.time()
+                if not capturing:
+                    print("Speech detected, capturing...")
+                    capturing = True
+                audio_buffer.extend(audio_data)
+            else:
+                if capturing and len(audio_buffer) > 0:
+                    if time.time() - start_time >= min_capture_duration / 1000:
+                        print("End of speech detected, saving audio...")
+                        VAD.write_wave(audio_file_path, np.array(audio_buffer), sample_rate)
+                        audio_buffer = []  # Reset the audio buffer
+                        capturing = False
+
+            # Check for stopping condition (end loop if no more audio is being captured)
+            if not capturing:
+                break
+
+        # Close the stream and terminate PyAudio
+        stream.stop_stream()
+        stream.close()
+        p.terminate()

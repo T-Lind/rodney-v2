@@ -1,0 +1,11 @@
+_type: prompt
+input_variables:
+  - user_response
+  - directive
+output_parser: null
+partial_variables: { }
+template: >
+  Here's what the user said (demarcated by triple backticks):
+  ```{user_response}```
+
+template_format: f-string
