@@ -5,7 +5,7 @@ import boto3
 import pyaudio
 from dotenv import load_dotenv
 from pandas import read_json
-
+from datetime import datetime
 from rodney_ai.Chatbot import Chatbot
 from rodney_conversation.VAD import VAD
 from rodney_conversation.printf import printf
@@ -145,9 +145,22 @@ class RodneyCommunication:
         segment_index = 0  # Initialize segment index
 
         while True:
-            audio_file_path = fr"C:\Users\tenant\PycharmProjects\rodney-v2\test\audio_bits\captured_audio_{segment_index:03d}_vad.wav"
+            # TODO: this should be set somewhere else, otherwise going to create a unique folder for each audio file
+            current_datetime = datetime.now().strftime("%m_%d_%y_%H_%M_%S")
+
+            base_path = fr"C:\Users\tenant\PycharmProjects\rodney-v2\test"
+            folder_name = f"conversation_{current_datetime}"
+            folder_path = os.path.join(base_path, folder_name)
+
+            # Create the new folder if it doesn't exist
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+
+            audio_file_path = os.path.join(folder_path, f"captured_audio_{segment_index:03d}_vad.wav")
+
             VAD.capture_and_segment_audio(audio_file_path)
 
+            print("Starting transcription...")
             transcription = self.amazon_transcribe(audio_file_path)
             printf("Transcription: "+transcription, color="green", type="bold")
 

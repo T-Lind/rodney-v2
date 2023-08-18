@@ -33,6 +33,8 @@ class VAD:
 
         Takes path, PCM audio data, and sample rate.
         """
+        print(f"Writing audio to path {path}")
+
         with contextlib.closing(wave.open(path, 'wb')) as wf:
             wf.setnchannels(1)
             wf.setsampwidth(2)
@@ -190,7 +192,7 @@ class VAD:
 
         print("Capturing audio from the microphone...")
 
-        capturing = False  # Flag to indicate if audio is being captured
+        capturing = True  # Flag to indicate if audio is being captured
 
         while True:
             audio_chunk = stream.read(int(sample_rate * frame_duration_ms / 1000))
@@ -213,6 +215,7 @@ class VAD:
             # Check for stopping condition (end loop if no more audio is being captured)
             if not capturing:
                 break
+
 
         # Close the stream and terminate PyAudio
         stream.stop_stream()
